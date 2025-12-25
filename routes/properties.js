@@ -7,7 +7,9 @@ import {
   getProperty,
   updateProperty,
   deleteProperty,
+  getMyProperties,
 } from "../controllers/propertyController.js";
+import auth from "../middleware/auth.js"; // adjust path/name to your auth middleware
 
 const router = express.Router();
 
@@ -22,8 +24,9 @@ const upload = multer({ storage });
 
 // Routes
 router.post("/", upload.array("images", 10), createProperty);
-router.put("/:id", upload.array("images", 10), updateProperty); // update
-router.delete("/:id", deleteProperty); // delete
+router.put("/:id", upload.array("images", 10), updateProperty);
+router.delete("/:id", deleteProperty);
+router.get("/mine", auth, getMyProperties);
 router.get("/", getProperties);
 router.get("/:id", getProperty);
 

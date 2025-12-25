@@ -11,14 +11,51 @@ res.status(500).send('Server error');
 
 export const getProperties = async (req, res) => {
 try {
-const filter = {};
-if (req.query.city) filter.city = req.query.city;
-if (req.query.type) filter.type = req.query.type;
-const props = await Property.find(filter).populate('owner', 'name email').sort({ createdAt: -1 });
-res.json(props);
+const query = {};
+
+if (req.query.type) query.type = req.query.type;
+if (req.query.city) query.city = req.query.city;
+
+// Rent filter
+if (req.query.minPrice || req.query.maxPrice) {
+query.price = {};
+if (req.query.minPrice) query.price.$gte = Number(req.query.minPrice);
+if (req.query.maxPrice) query.price.$lte = Number(req.query.maxPrice);
+}
+
+// Bedrooms filter
+if (req.query.bedrooms) {
+if (String(req.query.bedrooms).includes("+")) {
+// e.g. "4+ BHK"
+query.bedrooms = { $gte: parseInt(req.query.bedrooms) };
+} else {
+query.bedrooms = parseInt(req.query.bedrooms);
+}
+}
+
+// Bathrooms filter
+if (req.query.bathrooms) {
+if (String(req.query.bathrooms).includes("+")) {
+query.bathrooms = { $gte: parseInt(req.query.bathrooms) };
+} else {
+query.bathrooms = parseInt(req.query.bathrooms);
+}
+}
+
+// Parking filter (exact match)
+if (req.query.parking) query.parking = req.query.parking;
+
+// Furnishing filter (case-insensitive)
+if (req.query.furnishing) query.furnishing = new RegExp(req.query.furnishing, "i");
+
+// Property Age filter (exact match)
+if (req.query.propertyAge) query.propertyAge = req.query.propertyAge;
+
+const properties = await Property.find(query);
+res.json(properties);
 } catch (err) {
 console.error(err);
-res.status(500).send('Server error');
+res.status(500).json({ error: "Server error" });
 }
 };
 
