@@ -11,7 +11,15 @@ const app = express();
 
 connectDB();
 
-app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
+app.use(
+  cors({
+    origin: [
+      "https://realestate-frontend-delta.vercel.app",
+      "http://localhost:5173",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // serve uploaded images
@@ -19,8 +27,8 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
-app.get('/', (req, res) => {
-  res.send('Real Estate API is running...');
+app.get("/", (req, res) => {
+  res.send("Real Estate API is running...");
 });
 
 const PORT = process.env.PORT || 8000;
